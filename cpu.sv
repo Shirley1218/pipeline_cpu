@@ -18,13 +18,12 @@ module cpu
 
 localparam		PIPELINE_DEPTH = 1;
 localparam		PIPELINE_STAGE = 1;
-logic [15:0]	inst_ipipe				[1:PIPELINE_DEPTH];
+logic [15:0]	inst_ipipe				[1:PIPELINE_STAGE];
 logic [0:0]		inst_ipipe_valid		[1:PIPELINE_STAGE];
-logic [4:0]		opcode_i_pipe			[1:PIPELINE_DEPTH];
+logic [4:0]		opcode_i_pipe			[1:PIPELINE_STAGE];
 logic [15:0]	Rx_reg;
 logic [15:0]	Ry_reg;
 logic [15:0]	Ry_reg2;		// Ry from 2 stage ago 
-logic [2:0] 	write_src_ipipe			[1:PIPELINE_DEPTH];
 
 // execution reg
 logic [15:0]	alu_out_reg;
@@ -38,7 +37,7 @@ logic [15:0] 	imm8_ext_reg;
 always_ff @(posedge clk or posedge reset) begin 
 	
 	if(reset) begin
-		for(int i=1; i<=PIPELINE_DEPTH; i++) begin
+		for(int i=1; i<=PIPELINE_STAGE; i++) begin
 			inst_ipipe[i] <= '0;
 			Rx_ipipe[i] <= '0;
 			Ry_ipipe[i] <= '0; 
@@ -51,23 +50,10 @@ always_ff @(posedge clk or posedge reset) begin
 		// Pipeline Stage 1: Fetch
 		inst_ipipe[1] <= i_pc_rddata;
 		inst_ipipe_valid[1] <= '1;
-		// for(int i=2; i<=PIPELINE_DEPTH; i++) begin
-		// 	inst_ipipe[i] <= inst_ipipe[i-1];
-		// end
-		
-		// Pipeline Stage 2: Reg File Read
-		if(regfile_read_valid) inst_ipipe_valid[2] <= '1;
-		else inst_ipipe_valid[2] <= '0;
-
-		// Pipeline Stage 3: Execute
-		if(execute_valid) inst_ipipe_valid[3] <= '1;
-		else inst_ipipe_valid[3] <= '0;
-
-		// Pipeline Stage 4: Reg File Write
-		if(RegWrite) inst_ipipe_valid[4] <= '1;
-		else inst_ipipe_valid[4] <= '0;
-
-
+		for(int i=2; i<=PIPELINE_DEPTH; i++) begin
+			inst_ipipe[i] <= inst_ipipe[i-1];
+		end
+	
 	end
 end
 
@@ -100,12 +86,12 @@ gprs_top gprs(
 	.rd2(rd2), // read data 2
 	
 	// Control signal
-	.we(inst_ipipe_valid[4]),				// Reg Write
+	.we(RegWrite),				// Reg Write
 	.regfile(o_tb_regs)
 );
 
-assign o_ldst_wrdata = Rx_ipipe[PIPELINE_DEPTH];
-assign o_ldst_addr = mem_sel ? Ry_ipipe[PIPELINE_DEPTH] : pc_out;
+assign o_ldst_wrdata = Rx_reg;
+assign o_ldst_addr = mem_sel ? Rx_reg : pc_out;
 assign o_ldst_wr = write_valid; //todo
 
 pc my_pc(
