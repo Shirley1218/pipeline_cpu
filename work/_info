@@ -1,0 +1,371 @@
+m255
+K4
+z2
+13
+!s112 1.1
+!i10d 8192
+!i10e 25
+!i10f 100
+cModel Technology
+dC:/Users/zhoux/Desktop/ECE342/lda
+valu_16
+Z0 DXx6 sv_std 3 std 0 22 AD7iAPLo6nTIKk<N0eo=D3
+Z1 !s110 1553746341
+!i10b 1
+!s100 eVlQM]m29G4>ifE=OKKI80
+IC=fgWU[9eXSaNKnnNhHmC0
+Z2 VDg1SIo80bB@j0V0VzS_@n1
+!s105 alu_sv_unit
+S1
+Z3 dC:/Users/zhoux/Desktop/ECE342/lab7
+w1551242991
+8C:/Users/zhoux/Desktop/ECE342/lab7/processor/alu.sv
+FC:/Users/zhoux/Desktop/ECE342/lab7/processor/alu.sv
+L0 1
+Z4 OV;L;10.5b;63
+r1
+!s85 0
+31
+Z5 !s108 1553746341.000000
+!s107 C:/Users/zhoux/Desktop/ECE342/lab7/processor/alu.sv|
+!s90 -reportprogress|300|-work|work|-sv|-stats=none|C:/Users/zhoux/Desktop/ECE342/lab7/processor/alu.sv|
+!i113 1
+Z6 o-work work -sv
+Z7 tCvgOpt 0
+vcpu
+R0
+R1
+!i10b 1
+!s100 K6lUg:1I:FALVP5^F=hP?0
+IYAWfJ[La7X[A>dz><FAhK0
+R2
+!s105 cpu_sv_unit
+S1
+R3
+w1553746338
+8C:\Users\zhoux\Desktop\ECE342\lab7\cpu.sv
+FC:\Users\zhoux\Desktop\ECE342\lab7\cpu.sv
+L0 1
+R4
+r1
+!s85 0
+31
+R5
+!s107 C:\Users\zhoux\Desktop\ECE342\lab7\cpu.sv|
+!s90 -reportprogress|300|-work|work|-sv|-stats=none|C:\Users\zhoux\Desktop\ECE342\lab7\cpu.sv|
+!i113 1
+R6
+R7
+vfour_one_mux
+R0
+Z8 !s110 1553746342
+!i10b 1
+!s100 OSYc7;=73>1X@?Lnj?:gB3
+IBzEAo^eJ`ef426RYzQB]i0
+R2
+Z9 !s105 mux_sv_unit
+S1
+R3
+Z10 w1551635259
+Z11 8C:/Users/zhoux/Desktop/ECE342/lab7/processor/mux.sv
+Z12 FC:/Users/zhoux/Desktop/ECE342/lab7/processor/mux.sv
+L0 13
+R4
+r1
+!s85 0
+31
+R5
+Z13 !s107 C:/Users/zhoux/Desktop/ECE342/lab7/processor/mux.sv|
+Z14 !s90 -reportprogress|300|-work|work|-sv|-stats=none|C:/Users/zhoux/Desktop/ECE342/lab7/processor/mux.sv|
+!i113 1
+R6
+R7
+vgprs_top
+R0
+R1
+!i10b 1
+!s100 N8HR4DzM]TQJmE?VejL_91
+Ib07TQ:UA5zGaDK@9R3h0W0
+R2
+Z15 !s105 gprs_top_sv_unit
+S1
+R3
+Z16 w1553745950
+Z17 8C:/Users/zhoux/Desktop/ECE342/lab7/processor/gprs_top.sv
+Z18 FC:/Users/zhoux/Desktop/ECE342/lab7/processor/gprs_top.sv
+L0 3
+R4
+r1
+!s85 0
+31
+R5
+Z19 !s107 C:/Users/zhoux/Desktop/ECE342/lab7/processor/gprs_top.sv|
+Z20 !s90 -reportprogress|300|-work|work|-sv|-stats=none|C:/Users/zhoux/Desktop/ECE342/lab7/processor/gprs_top.sv|
+!i113 1
+R6
+R7
+vimmN_ext
+R0
+R1
+!i10b 1
+!s100 ZL]T?oimXalhhXV7_IHd93
+I9]9Y:]o5do;Z8`Zo9JEzC1
+R2
+Z21 !s105 sign_ext_sv_unit
+S1
+R3
+Z22 w1553741868
+Z23 8C:/Users/zhoux/Desktop/ECE342/lab7/processor/sign_ext.sv
+Z24 FC:/Users/zhoux/Desktop/ECE342/lab7/processor/sign_ext.sv
+L0 1
+R4
+r1
+!s85 0
+31
+R5
+Z25 !s107 C:/Users/zhoux/Desktop/ECE342/lab7/processor/sign_ext.sv|
+Z26 !s90 -reportprogress|300|-work|work|-sv|-stats=none|C:/Users/zhoux/Desktop/ECE342/lab7/processor/sign_ext.sv|
+!i113 1
+R6
+R7
+nimm@n_ext
+vopcode_decoder
+R0
+!s110 1553745644
+!i10b 1
+!s100 0VlzhcK8TaoXoj:U`I;gZ1
+IJ27GRQJS9?mQD7aCKY[@C3
+R2
+Z27 !s105 pipeline_decoder_sv_unit
+S1
+R3
+w1553743355
+Z28 8C:/Users/zhoux/Desktop/ECE342/lab7/processor/pipeline_decoder.sv
+Z29 FC:/Users/zhoux/Desktop/ECE342/lab7/processor/pipeline_decoder.sv
+L0 4
+R4
+r1
+!s85 0
+31
+!s108 1553745644.000000
+Z30 !s107 C:/Users/zhoux/Desktop/ECE342/lab7/processor/pipeline_decoder.sv|
+Z31 !s90 -reportprogress|300|-work|work|-sv|-stats=none|C:/Users/zhoux/Desktop/ECE342/lab7/processor/pipeline_decoder.sv|
+!i113 1
+R6
+R7
+vpc
+R0
+R8
+!i10b 1
+!s100 4UVk<?_nJ;eNDimnECh7c0
+ImLK[;MjT[^fE_z[`Ejh9Z1
+R2
+!s105 pc_sv_unit
+S1
+R3
+w1552690943
+8C:/Users/zhoux/Desktop/ECE342/lab7/processor/pc.sv
+FC:/Users/zhoux/Desktop/ECE342/lab7/processor/pc.sv
+L0 1
+R4
+r1
+!s85 0
+31
+Z32 !s108 1553746342.000000
+!s107 C:/Users/zhoux/Desktop/ECE342/lab7/processor/pc.sv|
+!s90 -reportprogress|300|-work|work|-sv|-stats=none|C:/Users/zhoux/Desktop/ECE342/lab7/processor/pc.sv|
+!i113 1
+R6
+R7
+vpipeline_decoder
+R0
+R8
+!i10b 1
+!s100 Y;:ClhB0AVnjJXg9e`M4[1
+Imm=;o6AHkQUMA1?IXVAB01
+R2
+R27
+S1
+R3
+w1553745721
+R28
+R29
+L0 4
+R4
+r1
+!s85 0
+31
+R32
+R30
+R31
+!i113 1
+R6
+R7
+vpipeline_reg
+R0
+R8
+!i10b 1
+!s100 DQKU`MeBm_=c99jjlSGe:0
+IC=bgiKAgU@N[6QkN=MGHk3
+R2
+!s105 pipeline_reg_sv_unit
+S1
+R3
+w1551585835
+8C:/Users/zhoux/Desktop/ECE342/lab7/processor/pipeline_reg.sv
+FC:/Users/zhoux/Desktop/ECE342/lab7/processor/pipeline_reg.sv
+L0 1
+R4
+r1
+!s85 0
+31
+R32
+!s107 C:/Users/zhoux/Desktop/ECE342/lab7/processor/pipeline_reg.sv|
+!s90 -reportprogress|300|-work|work|-sv|-stats=none|C:/Users/zhoux/Desktop/ECE342/lab7/processor/pipeline_reg.sv|
+!i113 1
+R6
+R7
+vram_decoder
+R0
+R1
+!i10b 1
+!s100 S<icPLH7`69e9FDC=nDfc1
+IoU28oIQgVP[JYM_?Rg1@_0
+R2
+R15
+S1
+R3
+R16
+R17
+R18
+L0 95
+R4
+r1
+!s85 0
+31
+R5
+R19
+R20
+!i113 1
+R6
+R7
+vreg_file_read
+R0
+R1
+!i10b 1
+!s100 `mJ86SejYPETgFz^nGg721
+I1?YzbQ<`G6omk]<CVBC`n1
+R2
+R15
+S1
+R3
+R16
+R17
+R18
+L0 75
+R4
+r1
+!s85 0
+31
+R5
+R19
+R20
+!i113 1
+R6
+R7
+vsign_ext
+R0
+R1
+!i10b 1
+!s100 O@hM5I;VjI<c2;Jm`Kz0K1
+I8W`5BOgcaOG3ceVi]NJMQ0
+R2
+R21
+S1
+R3
+R22
+R23
+R24
+L0 22
+R4
+r1
+!s85 0
+31
+R5
+R25
+R26
+!i113 1
+R6
+R7
+vsix_one_mux
+R0
+R8
+!i10b 1
+!s100 >eKVNZ`:3@0CKlV>?N8h>0
+I80Z`=M=mY`MVoElFXMbR^1
+R2
+R9
+S1
+R3
+R10
+R11
+R12
+L0 35
+R4
+r1
+!s85 0
+31
+R5
+R13
+R14
+!i113 1
+R6
+R7
+vtb
+R0
+R1
+!i10b 1
+!s100 P]kKz[J:Oa=D1AXo?bnSG3
+IKLU7Y>R_;PTo59fWREZ432
+R2
+!s105 tb_sv_unit
+S1
+R3
+w1553744806
+8C:/Users/zhoux/Desktop/ECE342/lab7/tb.sv
+FC:/Users/zhoux/Desktop/ECE342/lab7/tb.sv
+L0 1
+R4
+r1
+!s85 0
+31
+R5
+!s107 C:/Users/zhoux/Desktop/ECE342/lab7/tb.sv|
+!s90 -reportprogress|300|-work|work|-sv|-stats=none|C:/Users/zhoux/Desktop/ECE342/lab7/tb.sv|
+!i113 1
+R6
+R7
+vtwo_one_mux
+R0
+R8
+!i10b 1
+!s100 iB_o86TmEAJja>>^J@KHO0
+IDa]D6mA58n]UegnzTG=l;1
+R2
+R9
+S1
+R3
+R10
+R11
+R12
+L0 1
+R4
+r1
+!s85 0
+31
+R5
+R13
+R14
+!i113 1
+R6
+R7

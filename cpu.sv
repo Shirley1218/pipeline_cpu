@@ -16,22 +16,42 @@ module cpu
 	output [7:0][15:0] o_tb_regs
 );
 
-localparam		PIPELINE_DEPTH = 1;
-localparam		PIPELINE_STAGE = 1;
+
+localparam		PIPELINE_STAGE = 4;
 logic [15:0]	inst_ipipe				[1:PIPELINE_STAGE];
 logic [0:0]		inst_ipipe_valid		[1:PIPELINE_STAGE];
 logic [4:0]		opcode_i_pipe			[1:PIPELINE_STAGE];
 logic [15:0]	Rx_reg;
 logic [15:0]	Ry_reg;
 logic [15:0]	Ry_reg2;		// Ry from 2 stage ago 
-
+logic [15:0]	wd;
+logic [15:0]	rd1;
+logic [15:0]	rd2;
+logic [15:0]	pc_in;
+logic [15:0]	pc_nxt;
+logic [15:0]	pc_out;
+logic [15:0]	alu_out;
+logic [15:0] 	imm8_ext;
+logic [15:0] 	imm11_ext;
 // execution reg
 logic [15:0]	alu_out_reg;
 logic			zero_reg;
 logic 			neg_reg;
 logic [7:0] 	imm8_reg;
-logic [15:0] 	imm8_ext;
 logic [15:0] 	imm8_ext_reg;
+
+logic		RegDst;
+logic [2:0]		WBSrc;
+logic		RegWrite;
+logic		ExtSel;
+logic		BSrc;
+logic		BrSrc;
+logic		ALUOp;
+logic		NZ;
+logic [1:0]		br_sel;
+logic		pc_enable;
+logic		PCSrc;
+
 
 // implement the cpu pipeline
 always_ff @(posedge clk or posedge reset) begin 
@@ -39,8 +59,6 @@ always_ff @(posedge clk or posedge reset) begin
 	if(reset) begin
 		for(int i=1; i<=PIPELINE_STAGE; i++) begin
 			inst_ipipe[i] <= '0;
-			Rx_ipipe[i] <= '0;
-			Ry_ipipe[i] <= '0; 
 		end
 		for(int i=1; i<=PIPELINE_STAGE; i++) begin
 			inst_ipipe_valid[i] <= '0;
@@ -50,7 +68,7 @@ always_ff @(posedge clk or posedge reset) begin
 		// Pipeline Stage 1: Fetch
 		inst_ipipe[1] <= i_pc_rddata;
 		inst_ipipe_valid[1] <= '1;
-		for(int i=2; i<=PIPELINE_DEPTH; i++) begin
+		for(int i=2; i<=PIPELINE_STAGE; i++) begin
 			inst_ipipe[i] <= inst_ipipe[i-1];
 		end
 	
@@ -58,8 +76,8 @@ always_ff @(posedge clk or posedge reset) begin
 end
 
 always_comb begin
-	for(int i=1; i<=PIPELINE_DEPTH; i++) begin
-		opcode_i_pipe[i] = inst_ipipe[4:0][i];
+	for(int i=1; i<=PIPELINE_STAGE; i++) begin
+		opcode_i_pipe[i] = inst_ipipe[i][4:0];
 	end
 end
 
@@ -91,8 +109,7 @@ gprs_top gprs(
 );
 
 assign o_ldst_wrdata = Rx_reg;
-assign o_ldst_addr = mem_sel ? Rx_reg : pc_out;
-assign o_ldst_wr = write_valid; //todo
+assign o_ldst_addr = Rx_reg;
 
 pc my_pc(
     .clk(clk),
@@ -128,20 +145,21 @@ pipeline_decoder control_path0(
 	.RegDst(RegDst)// 0 for Rx, 1 for R7
 );
 
-assign pc_in = PCSrc ? br : pc_nxt;
+//assign pc_in = PCSrc ? br : pc_nxt;
+assign pc_in = pc_nxt;
 
-
-//logic [15:0] mem_in;
+logic [15:0] mem_in;
 //assign mem_in = inst_ipipe[PIPELINE_DEPTH];
 logic [15:0] mvhi_out;
 assign mvhi_out = {imm8_reg,Rx_reg[7:0]};
 
 sign_ext imm8_sign_ext(
-	.in(inst_ipipe[3]),
+	.in(inst_ipipe[3][15:8]),
 	.out(imm8_ext)
 );
-sign_ext imm8_sign_ext #(11) (
-	.in(inst_ipipe[3]),
+sign_ext #(11) imm11_sign_ext
+(
+	.in(inst_ipipe[3][15:5]),
 	.out(imm11_ext)
 );
 
@@ -152,21 +170,22 @@ six_one_mux sel_to_wd
 	.data_in3(Ry_reg2),
 	.data_in4(imm8_ext_reg),
 	.data_in5(mvhi_out),
+	.data_in6(),
 	.sel(WBSrc),
 	.mux_out(wd)
 );
 
 
-four_one_mux #(1) sel_to_br
-(
-	.data_in1(1'b1),
-	.data_in2(zero),
-	.data_in3(neg),
-	.data_in4(1'b0), 
-	.sel(br_sel), // 0 = always br(no condition) , 1 = branch if Z == 1, 2 = branch if N == 1
-	.mux_out(br_cond)
-);
-assign br = br_cond ? ( BrSrc ? pc_nxt + imm_ext * 2 : rd1 ): pc_nxt; // branch to pc + imm if condition meet
+// four_one_mux #(1) sel_to_br
+// (
+// 	.data_in1(1'b1),
+// 	.data_in2(zero),
+// 	.data_in3(neg),
+// 	.data_in4(1'b0), 
+// 	.sel(br_sel), // 0 = always br(no condition) , 1 = branch if Z == 1, 2 = branch if N == 1
+// 	.mux_out(br_cond)
+// );
+//assign br = br_cond ? ( BrSrc ? pc_nxt + imm_ext * 2 : rd1 ): pc_nxt; // branch to pc + imm if condition meet
 
 // stage 3 alu op
 alu_16 my_alu(
@@ -206,6 +225,5 @@ always_ff @ (posedge clk or posedge reset) begin
 	alu_out_reg <= alu_out;
 	imm8_reg <= inst_ipipe[3];
 	imm8_ext_reg <= imm8_ext;
-
+end
 endmodule
-

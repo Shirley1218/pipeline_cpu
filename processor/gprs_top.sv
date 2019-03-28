@@ -73,7 +73,7 @@ module gprs_top(
 endmodule
 
 module reg_file_read(
-	input [15:0]			regfile [7:0],
+	input [7:0][15:0] regfile,
 	input [2:0]				reg_addr,
 	output logic [15:0]	reg_out
 	);

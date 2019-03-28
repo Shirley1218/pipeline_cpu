@@ -1,7 +1,7 @@
 
 // This is the control module for cpu
 // It takes four 5-bit opcode and decode correspondingly 
-module opcode_decoder(
+module pipeline_decoder(
 	input clk,
 	input reset,
 	//input opcode

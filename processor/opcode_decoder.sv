@@ -23,7 +23,7 @@ module opcode_decoder(
 	output logic MemRead,
 	output logic [1:0]br_sel, // 0 = always br(no condition) , 1 = branch if Z == 1, 2 = branch if N == 1
 	//output logic lock_instruction,
-	output logic regfile_read_single;
+	output logic regfile_read_single
 );
 enum int unsigned
 {
