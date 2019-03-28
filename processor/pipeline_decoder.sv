@@ -5,7 +5,7 @@ module pipeline_decoder(
 	input clk,
 	input reset,
 	//input opcode
-	input [4:0] opcode [4], 
+	input [4:0] opcode [1:4], 
 	
 	// control signals for each stages 
 
@@ -34,10 +34,10 @@ module pipeline_decoder(
 	
 );
 
-	// stage 1 Fetch opcode[1]
+	// stage 1 Fetch opcode[2]
 	always_comb begin
 		// branch instruction disable pc_enable for part 1
-		if ( opcode[1][3] == 1'b1 ) begin
+		if ( opcode[2][3] == 1'b1 ) begin
 			pc_enable = 1'b0;
 			PCSrc = 1'b1;
 	 	end else begin
@@ -61,9 +61,9 @@ module pipeline_decoder(
 		else ALUOp = 1'b1;
 
 		// BSrc
-		// opcode bit 4 is high, alu data_b input = Ry
-		if ( opcode[3][4] ) BSrc = 1'b0;
-		else BSrc = 1'b1;
+		// opcode bit 4 is high, alu data_b input = imm8 ext
+		if ( opcode[3][4] ) BSrc = 1'b1;
+		else BSrc = 1'b0;
 
 		// ExtSel
 		// opcode bit 3 is high, use imm11

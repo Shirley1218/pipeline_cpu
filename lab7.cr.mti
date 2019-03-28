@@ -1,4 +1,11 @@
-C:/Users/zhoux/Desktop/ECE342/lab7/processor/sign_ext.sv {1 {vlog -work work -sv -stats=none C:/Users/zhoux/Desktop/ECE342/lab7/processor/sign_ext.sv
+C:/Users/zhoux/Desktop/ECE342/lab7/cpu.sv {1 {vlog -work work -sv -stats=none {C:\Users\zhoux\Desktop\ECE342\lab7\cpu.sv}
+Model Technology ModelSim - Intel FPGA Edition vlog 10.5b Compiler 2016.10 Oct  5 2016
+-- Compiling module cpu
+
+Top level modules:
+	cpu
+
+} {} {}} C:/Users/zhoux/Desktop/ECE342/lab7/processor/sign_ext.sv {1 {vlog -work work -sv -stats=none C:/Users/zhoux/Desktop/ECE342/lab7/processor/sign_ext.sv
 Model Technology ModelSim - Intel FPGA Edition vlog 10.5b Compiler 2016.10 Oct  5 2016
 -- Compiling module immN_ext
 -- Compiling module sign_ext
@@ -53,12 +60,5 @@ Model Technology ModelSim - Intel FPGA Edition vlog 10.5b Compiler 2016.10 Oct  
 
 Top level modules:
 	pc
-
-} {} {}} C:/Users/zhoux/Desktop/ECE342/lab7/tb.sv {1 {vlog -work work -sv -stats=none C:/Users/zhoux/Desktop/ECE342/lab7/tb.sv
-Model Technology ModelSim - Intel FPGA Edition vlog 10.5b Compiler 2016.10 Oct  5 2016
--- Compiling module tb
-
-Top level modules:
-	tb
 
 } {} {}}

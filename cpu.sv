@@ -23,6 +23,7 @@ logic [0:0]		inst_ipipe_valid		[1:PIPELINE_STAGE];
 logic [4:0]		opcode_i_pipe			[1:PIPELINE_STAGE];
 logic [15:0]	Rx_reg;
 logic [15:0]	Ry_reg;
+logic [15:0]	Rx_reg2;		// Rx from 2 stage ago 
 logic [15:0]	Ry_reg2;		// Ry from 2 stage ago 
 logic [15:0]	wd;
 logic [15:0]	rd1;
@@ -52,7 +53,9 @@ logic [1:0]		br_sel;
 logic		pc_enable;
 logic		PCSrc;
 
-
+assign o_pc_addr = pc_out;
+assign o_pc_rd = pc_enable;
+assign pc_in = pc_nxt;
 // implement the cpu pipeline
 always_ff @(posedge clk or posedge reset) begin 
 	
@@ -63,15 +66,15 @@ always_ff @(posedge clk or posedge reset) begin
 		for(int i=1; i<=PIPELINE_STAGE; i++) begin
 			inst_ipipe_valid[i] <= '0;
 		end
+
 	end else begin
 
 		// Pipeline Stage 1: Fetch
-		inst_ipipe[1] <= i_pc_rddata;
+		inst_ipipe[2] <= i_pc_rddata;
 		inst_ipipe_valid[1] <= '1;
-		for(int i=2; i<=PIPELINE_STAGE; i++) begin
+		for(int i=3; i<=PIPELINE_STAGE; i++) begin
 			inst_ipipe[i] <= inst_ipipe[i-1];
 		end
-	
 	end
 end
 
@@ -87,8 +90,8 @@ assign ws = RegDst ? 3'b111 : inst_ipipe[4][7:5];
 logic [2:0] rs1,rs2;
 //logic regfile_read_single; // = 1 if inst_ipipe[4] only use Rx, if so, read Ry from inst_ipipe[4]
 							// = 0 if inst_ipipe[4] use both Rx and Ry
-assign rs1 = inst_ipipe[1][7:5];
-assign rs2 = inst_ipipe[1][10:8];
+assign rs1 = inst_ipipe[2][7:5];
+assign rs2 = inst_ipipe[2][10:8];
  
 gprs_top gprs(
 
@@ -145,13 +148,11 @@ pipeline_decoder control_path0(
 	.RegDst(RegDst)// 0 for Rx, 1 for R7
 );
 
-//assign pc_in = PCSrc ? br : pc_nxt;
-assign pc_in = pc_nxt;
 
 logic [15:0] mem_in;
 //assign mem_in = inst_ipipe[PIPELINE_DEPTH];
 logic [15:0] mvhi_out;
-assign mvhi_out = {imm8_reg,Rx_reg[7:0]};
+assign mvhi_out = {imm8_reg,Rx_reg2[7:0]};
 
 sign_ext imm8_sign_ext(
 	.in(inst_ipipe[3][15:8]),
@@ -190,7 +191,7 @@ six_one_mux sel_to_wd
 // stage 3 alu op
 alu_16 my_alu(
     .data_in_a(Rx_reg),
-    .data_in_b(BSrc ? imm_ext : Ry_reg),
+    .data_in_b(BSrc ? imm8_ext : Ry_reg),
     .sub(ALUOp),
     .alu_out(alu_out),
     .zero(alu_zero),
@@ -205,6 +206,7 @@ always_ff @ (posedge clk or posedge reset) begin
 		Ry_reg2 <= '0;
 	end else begin
 		Rx_reg <= rd1;
+		Rx_reg2 <= Rx_reg;
 		Ry_reg <= rd2;
 		Ry_reg2 <= Ry_reg;
 	end
@@ -223,7 +225,7 @@ always_ff @ (posedge clk or posedge reset) begin
 		neg_reg <= neg_reg;
 	end
 	alu_out_reg <= alu_out;
-	imm8_reg <= inst_ipipe[3];
+	imm8_reg <= inst_ipipe[3]; // 
 	imm8_ext_reg <= imm8_ext;
 end
 endmodule
