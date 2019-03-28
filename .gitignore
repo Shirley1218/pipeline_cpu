@@ -1,0 +1,6 @@
+*.hex
+*.s
+*.qpf
+*.qsf
+*.sdc
+tb.sv
