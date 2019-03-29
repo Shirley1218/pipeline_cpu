@@ -98,3 +98,90 @@ module pipeline_decoder(
 	end 
 
 endmodule
+
+module dependency_helper(
+	input logic [15:0]	inst_ipipe	[1:4],
+	input [4:0] opcode [1:4], 
+	output hold_in_decode_state
+	);
+	logic n_valid, z_valid, rx_valid, mem_ry_valid;
+	logic [2:0] rx_wr;
+	logic [2:0] ry_wr;
+	logic [2:0] rx_rd; 
+	logic [2:0] ry_rd; 
+
+	logic [2:0] valid;
+
+	assign rx_wr = inst_ipipe[3][7:5];
+	assign ry_wr = inst_ipipe[3][10:8];
+	assign rx_rd = inst_ipipe[4][7:5];
+	assign ry_rd = inst_ipipe[4][10:8];
+
+	typedef enum { n_z, rf, mem_ry} resource;
+
+	logic [2:0] reading_src;//each bit represent need for each resource
+	logic [2:0] writing_dst;
+	logic reading_count; // 1 for rx and ry, 0 for all the others 
+
+	always_comb begin
+		case (opcode[4])
+			5'b00000 :  writing_dst = 3'b010;
+			5'b00001 :  writing_dst = 3'b010;
+			5'b00010 :  writing_dst = 3'b010;
+
+			5'b00011 :  writing_dst = 3'b100; //cmp
+			5'b00100 :  writing_dst = 3'b010;
+			5'b00101 :  writing_dst = 3'b001;	//st
+
+			5'b10000 :  writing_dst = 3'b010;		//mvi
+			5'b10001 :  writing_dst = 3'b110;
+			5'b10010 :  writing_dst = 3'b110;
+			5'b10011 :  writing_dst = 3'b100;	//cmpi
+			5'b10110 :  writing_dst = 3'b010;	//mvhi
+
+			default : writing_dst = 3'b000;
+		endcase
+
+	end
+
+	always_comb begin
+		reading_count = 1'b0;
+		case (opcode[3])
+			5'b00000 :  reading_src = 3'b010;
+			5'b00001 :  begin reading_src = 3'b010; reading_count = 1;b1; end
+			5'b00010 :  begin reading_src = 3'b010; reading_count = 1;b1; end
+
+			5'b00011 :  begin reading_src = 3'b010; reading_count = 1;b1; end//cmp
+			5'b00100 :  reading_src = 3'b001;
+			5'b00101 :  reading_src = 3'b010;	//st
+
+			5'b10000 :  reading_src = 3'b000;		//mvi
+			5'b10001 :  reading_src = 3'b010;
+			5'b10010 :  reading_src = 3'b010;
+			5'b10011 :  reading_src = 3'b010;	//cmpi
+			5'b10110 :  reading_src = 3'b000;	//mvhi
+
+			default : reading_src = 3'b000;
+		endcase
+
+	end
+
+	always_comb begin
+		valid[0] = writing_dst[0] & reading_src[0];
+
+
+		if(writing_dst[1] & reading_src[1]) begin
+			if(reading_count) begin
+				valid [1] =  (rx_wr != rx_rd) && (rx_wr != ry_rd);
+			end else begin
+				valid [1] =  (rx_wr != rx_rd);
+			end
+		end
+		else valid[1] = 1'b1;
+
+		if(writing_dst[2] & reading_src[2]) valid[2] = ry_wr != ry_rd;
+	end
+
+	assign hold_in_decode_state = valid[0] & valid[1] &valid[2];
+
+endmodule

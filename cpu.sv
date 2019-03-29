@@ -19,7 +19,7 @@ module cpu
 
 localparam		PIPELINE_STAGE = 4;
 logic [15:0]	inst_ipipe				[1:PIPELINE_STAGE];
-logic [0:0]		inst_ipipe_valid		[1:PIPELINE_STAGE];
+// logic [0:0]		inst_ipipe_valid		[1:PIPELINE_STAGE];
 logic [4:0]		opcode_i_pipe			[1:PIPELINE_STAGE];
 logic [15:0]	Rx_reg;
 logic [15:0]	Ry_reg;
@@ -53,6 +53,10 @@ logic [1:0]		br_sel;
 logic		pc_enable;
 logic		PCSrc;
 
+logic hold_in_decode_state;
+
+
+
 assign o_pc_addr = pc_out;
 assign o_pc_rd = pc_enable;
 assign pc_in = pc_nxt;
@@ -63,18 +67,21 @@ always_ff @(posedge clk or posedge reset) begin
 		for(int i=1; i<=PIPELINE_STAGE; i++) begin
 			inst_ipipe[i] <= '0;
 		end
-		for(int i=1; i<=PIPELINE_STAGE; i++) begin
-			inst_ipipe_valid[i] <= '0;
-		end
+		// for(int i=1; i<=PIPELINE_STAGE; i++) begin
+		// 	inst_ipipe_valid[i] <= '0;
+		// end
 
 	end else begin
 
 		// Pipeline Stage 1: Fetch
 		inst_ipipe[2] <= i_pc_rddata;
-		inst_ipipe_valid[1] <= '1;
-		for(int i=3; i<=PIPELINE_STAGE; i++) begin
-			inst_ipipe[i] <= inst_ipipe[i-1];
-		end
+		// inst_ipipe_valid[1] <= '1;
+		// for(int i=3; i<=PIPELINE_STAGE; i++) begin
+		// 	inst_ipipe[i] <= inst_ipipe[i-1];
+		// end
+
+		inst_ipipe[3] <= inst_ipipe[2];
+		inst_ipipe[4] <= inst_ipipe[3];
 	end
 end
 
@@ -177,16 +184,13 @@ six_one_mux sel_to_wd
 );
 
 
-// four_one_mux #(1) sel_to_br
-// (
-// 	.data_in1(1'b1),
-// 	.data_in2(zero),
-// 	.data_in3(neg),
-// 	.data_in4(1'b0), 
-// 	.sel(br_sel), // 0 = always br(no condition) , 1 = branch if Z == 1, 2 = branch if N == 1
-// 	.mux_out(br_cond)
-// );
-//assign br = br_cond ? ( BrSrc ? pc_nxt + imm_ext * 2 : rd1 ): pc_nxt; // branch to pc + imm if condition meet
+dependency_helper helper(
+	.inst_ipipe	(inst_ipipe),
+	.opcode(opcode_i_pipe), 
+	.hold_in_decode_state(hold_in_decode_state)
+	);
+
+
 
 // stage 3 alu op
 alu_16 my_alu(
