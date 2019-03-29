@@ -148,10 +148,10 @@ module dependency_helper(
 		reading_count = 1'b0;
 		case (opcode[3])
 			5'b00000 :  reading_src = 3'b010;
-			5'b00001 :  begin reading_src = 3'b010; reading_count = 1;b1; end
-			5'b00010 :  begin reading_src = 3'b010; reading_count = 1;b1; end
+			5'b00001 :  begin reading_src = 3'b010; reading_count = 1'b1; end
+			5'b00010 :  begin reading_src = 3'b010; reading_count = 1'b1; end
 
-			5'b00011 :  begin reading_src = 3'b010; reading_count = 1;b1; end//cmp
+			5'b00011 :  begin reading_src = 3'b010; reading_count = 1'b1; end//cmp
 			5'b00100 :  reading_src = 3'b001;
 			5'b00101 :  reading_src = 3'b010;	//st
 
@@ -167,7 +167,7 @@ module dependency_helper(
 	end
 
 	always_comb begin
-		valid[0] = writing_dst[0] & reading_src[0];
+		valid[0] = ~(writing_dst[0] & reading_src[0]);
 
 
 		if(writing_dst[1] & reading_src[1]) begin
