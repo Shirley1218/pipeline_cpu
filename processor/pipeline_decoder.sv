@@ -112,10 +112,10 @@ module dependency_helper(
 
 	logic [2:0] valid;
 
-	assign rx_wr = inst_ipipe[3][7:5];
-	assign ry_wr = inst_ipipe[3][10:8];
-	assign rx_rd = inst_ipipe[4][7:5];
-	assign ry_rd = inst_ipipe[4][10:8];
+	assign rx_wr = inst_ipipe[4][7:5];
+	assign ry_wr = inst_ipipe[4][10:8];
+	assign rx_rd = inst_ipipe[3][7:5];
+	assign ry_rd = inst_ipipe[3][10:8];
 
 	typedef enum { n_z, rf, mem_ry} resource;
 
@@ -171,7 +171,9 @@ module dependency_helper(
 
 
 		if(writing_dst[1] & reading_src[1]) begin
-			if(reading_count) begin
+			if(inst_ipipe[4] == 16'd0)begin 
+				valid [1] = 1'b1;
+			end else if(reading_count) begin
 				valid [1] =  (rx_wr != rx_rd) && (rx_wr != ry_rd);
 			end else begin
 				valid [1] =  (rx_wr != rx_rd);
@@ -180,8 +182,9 @@ module dependency_helper(
 		else valid[1] = 1'b1;
 
 		if(writing_dst[2] & reading_src[2]) valid[2] = ry_wr != ry_rd;
+		else valid[2] = 1'b1;
 	end
 
-	assign hold_in_decode_state = valid[0] & valid[1] &valid[2];
+	assign hold_in_decode_state = ~(valid[0] & valid[1] &valid[2]);
 
 endmodule

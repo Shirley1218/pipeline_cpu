@@ -74,14 +74,15 @@ always_ff @(posedge clk or posedge reset) begin
 	end else begin
 
 		// Pipeline Stage 1: Fetch
-		inst_ipipe[2] <= i_pc_rddata;
-		// inst_ipipe_valid[1] <= '1;
-		// for(int i=3; i<=PIPELINE_STAGE; i++) begin
-		// 	inst_ipipe[i] <= inst_ipipe[i-1];
-		// end
-
-		inst_ipipe[3] <= inst_ipipe[2];
-		inst_ipipe[4] <= inst_ipipe[3];
+		if(hold_in_decode_state)begin
+			inst_ipipe[2] <= inst_ipipe[2];
+			inst_ipipe[3] <= inst_ipipe[3];
+			inst_ipipe[4] <= inst_ipipe[4];
+		end else begin
+			inst_ipipe[2] <= i_pc_rddata;
+			inst_ipipe[3] <= inst_ipipe[2];
+			inst_ipipe[4] <= inst_ipipe[3];
+		end
 	end
 end
 
@@ -208,6 +209,11 @@ always_ff @ (posedge clk or posedge reset) begin
 		Rx_reg <= '0;
 		Ry_reg <= '0;
 		Ry_reg2 <= '0;
+	end else if (hold_in_decode_state) begin
+		Rx_reg <= Rx_reg;
+		Rx_reg2 <= Rx_reg2;
+		Ry_reg <= Ry_reg;
+		Ry_reg2 <= Ry_reg2;
 	end else begin
 		Rx_reg <= rd1;
 		Rx_reg2 <= Rx_reg;
