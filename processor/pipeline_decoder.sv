@@ -100,6 +100,8 @@ module pipeline_decoder(
 endmodule
 
 module dependency_helper(
+	input clk,
+	input reset,
 	input logic [15:0]	inst_ipipe	[1:4],
 	input [4:0] opcode [1:4], 
 	output hold_in_decode_state
@@ -185,6 +187,15 @@ module dependency_helper(
 		else valid[2] = 1'b1;
 	end
 
-	assign hold_in_decode_state = ~(valid[0] & valid[1] &valid[2]);
+	reg stalled;
+	always_ff @(posedge clk or posedge reset) begin 
+		if(reset) begin
+			stalled <= 0;
+		end else begin
+			stalled <= hold_in_decode_state;
+		end
+	end
+
+	assign hold_in_decode_state = ~((valid[0] & valid[1] &valid[2])|stalled);
 
 endmodule

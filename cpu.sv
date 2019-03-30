@@ -186,6 +186,8 @@ six_one_mux sel_to_wd
 
 
 dependency_helper helper(
+	.clk(clk),
+	.reset(reset),
 	.inst_ipipe	(inst_ipipe),
 	.opcode(opcode_i_pipe), 
 	.hold_in_decode_state(hold_in_decode_state)
