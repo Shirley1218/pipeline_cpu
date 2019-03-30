@@ -222,11 +222,11 @@ always_ff @ (posedge clk or posedge reset) begin
 		Rx_reg <= '0;
 		Ry_reg <= '0;
 		Ry_reg2 <= '0;
-	end else if (hold_in_decode_state) begin
-		Rx_reg <= Rx_reg;
-		Rx_reg2 <= Rx_reg2;
-		Ry_reg <= Ry_reg;
-		Ry_reg2 <= Ry_reg2;
+	// end else if (hold_in_decode_state) begin
+	// 	Rx_reg <= Rx_reg;
+	// 	Rx_reg2 <= Rx_reg2;
+	// 	Ry_reg <= Ry_reg;
+	// 	Ry_reg2 <= Ry_reg2;
 	end else begin
 		Rx_reg <= rd1;
 		Rx_reg2 <= Rx_reg;

@@ -117,13 +117,17 @@ module dependency_helper(
 	input [4:0] opcode [1:4], 
 	output hold_in_decode_state
 	);
+	logic [2:0] rx_wr_w;
+	logic [2:0] ry_wr_w;
 	logic [2:0] rx_wr;
 	logic [2:0] ry_wr;
 	logic [2:0] rx_rd; 
 	logic [2:0] ry_rd; 
 
-	logic [2:0] valid;
+	logic [5:0] valid;
 
+	assign rx_wr_w = inst_ipipe[4][7:5];
+	assign ry_wr_w = inst_ipipe[4][10:8];
 	assign rx_wr = inst_ipipe[3][7:5];
 	assign ry_wr = inst_ipipe[3][10:8];
 	assign rx_rd = inst_ipipe[2][7:5];
@@ -133,7 +137,29 @@ module dependency_helper(
 
 	logic [2:0] reading_src;//each bit represent need for each resource
 	logic [2:0] writing_dst;
+	logic [2:0] writing_dst_w;
 	logic [1:0] reading_reg; // reading_reg[1] for rx ,reading_reg[0] for ry
+
+	always_comb begin
+		case (opcode[4])
+			5'b00000 :  writing_dst_w = 3'b010;
+			5'b00001 :  writing_dst_w = 3'b010;
+			5'b00010 :  writing_dst_w = 3'b010;
+
+			5'b00011 :  writing_dst_w = 3'b100; //cmp
+			5'b00100 :  writing_dst_w = 3'b010;
+			5'b00101 :  writing_dst_w = 3'b001;	//st
+
+			5'b10000 :  writing_dst_w = 3'b010;		//mvi
+			5'b10001 :  writing_dst_w = 3'b110;
+			5'b10010 :  writing_dst_w = 3'b110;
+			5'b10011 :  writing_dst_w = 3'b100;	//cmpi
+			5'b10110 :  writing_dst_w = 3'b010;	//mvhi
+
+			default : writing_dst_w = 3'b000;
+		endcase
+
+	end
 
 	always_comb begin
 		case (opcode[3])
@@ -179,6 +205,7 @@ module dependency_helper(
 	end
 
 	logic rx_valid, ry_valid;
+	logic rx_valid_w, ry_valid_w;
 
 	always_comb begin
 		valid[0] = ~(writing_dst[0] & reading_src[0]);
@@ -195,10 +222,28 @@ module dependency_helper(
 
 		if(writing_dst[2] & reading_src[2]) valid[2] = ry_wr != ry_rd;
 		else valid[2] = 1'b1;
+
+
+		//handle stage 4 and stage 2
+		valid[3] = ~(writing_dst_w[0] & reading_src[0]);
+
+		rx_valid_w = reading_reg[1] ? (rx_wr_w != rx_rd) : 1'b1;
+		ry_valid_w = reading_reg[0] ? (rx_wr_w != ry_rd) : 1'b1;
+
+		if(writing_dst_w[1] & reading_src[1]) begin
+			if(inst_ipipe[4] == 16'd0)begin 
+				valid [4] = 1'b1;
+			end else valid[4] = rx_valid_w & ry_valid_w;
+		end
+		else valid[4] = 1'b1;
+
+		if(writing_dst_w[2] & reading_src[2]) valid[5] = ry_wr_w != ry_rd;
+		else valid[5] = 1'b1;
 	end
 
-	logic hold;
-	assign hold = (~(valid[0] & valid[1] &valid[2]));
+	logic hold, hold_short;
+	// assign hold_short =  ~(valid[3] & valid[4] & valid[5]);
+	assign hold = ~(valid[0] & valid[1] & valid[2] & valid[3] & valid[4] & valid[5]);
 
 	reg [1:0] stalled;
 	always_ff @(posedge clk or posedge reset) begin 
