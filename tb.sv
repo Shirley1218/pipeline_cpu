@@ -304,10 +304,10 @@ endtask
 initial begin
 	// Comment these out to run only certain tests.
 	// do_test(0);
-	do_test(1);
+	// do_test(1);
 	// do_test(2);
 	// do_test(3);
-	// do_test(4);
+	do_test(4);
 	// do_test(5);
 	
 	$stop;

@@ -104,6 +104,10 @@ module pipeline_decoder(
 			else if ( opcode[4] == 5'b10000 ) WBSrc = 3'b011;
 			else if ( opcode[4] == 5'b10110 ) WBSrc = 3'b100;
 			else WBSrc = 3'b001;
+
+			//MemRead
+			if(opcode[4] == 5'b00100) MemRead = 1'b1;
+			else MemRead = 1'b0;
 		end
 
 	end 
@@ -187,10 +191,10 @@ module dependency_helper(
 		case (opcode[2])
 			5'b00000 :  begin reading_src = 3'b010; reading_reg = 2'b01; end
 			5'b00001 :  begin reading_src = 3'b010; reading_reg = 2'b11; end
-			5'b00010 :  begin reading_src = 3'b010; reading_reg = 1'b11; end
+			5'b00010 :  begin reading_src = 3'b010; reading_reg = 2'b11; end
 
-			5'b00011 :  begin reading_src = 3'b010; reading_reg = 1'b11; end//cmp
-			5'b00100 :  reading_src = 3'b001;
+			5'b00011 :  begin reading_src = 3'b010; reading_reg = 2'b11; end//cmp
+			5'b00100 :  begin reading_src = 3'b011;	reading_reg = 2'b01; end//ld
 			5'b00101 :  begin reading_src = 3'b010;	reading_reg = 2'b10; end//st
 
 			5'b10000 :  reading_src = 3'b000;		//mvi
@@ -241,20 +245,21 @@ module dependency_helper(
 		else valid[5] = 1'b1;
 	end
 
-	logic hold, hold_short;
-	// assign hold_short =  ~(valid[3] & valid[4] & valid[5]);
-	assign hold = ~(valid[0] & valid[1] & valid[2] & valid[3] & valid[4] & valid[5]);
-
 	reg [1:0] stalled;
+	logic hold, hold_short;
+	assign hold_short =  (~(valid[3] & valid[4] & valid[5])) & (~stalled[0]);
+	assign hold = ~(valid[0] & valid[1] & valid[2]);
+
+	
 	always_ff @(posedge clk or posedge reset) begin 
 		if(reset) begin
 			stalled <= 2'b00;
 		end else begin
-			stalled[0] <= hold;
+			stalled[0] <= hold | hold_short;
 			stalled[1] <= stalled[0];
 		end
 	end
 
-	assign hold_in_decode_state = hold | stalled[0];
+	assign hold_in_decode_state = hold | stalled[0] | hold_short;
 
 endmodule

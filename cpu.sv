@@ -171,7 +171,7 @@ pipeline_decoder control_path0(
 logic [15:0] mem_in;
 //assign mem_in = inst_ipipe[PIPELINE_DEPTH];
 logic [15:0] mvhi_out;
-assign mvhi_out = {imm8_reg,Rx_reg2[7:0]};
+assign mvhi_out = {imm8_reg,rd1[7:0]};
 
 sign_ext imm8_sign_ext(
 	.in(inst_ipipe[3][15:8]),
@@ -248,7 +248,7 @@ always_ff @ (posedge clk or posedge reset) begin
 		neg_reg <= neg_reg;
 	end
 	alu_out_reg <= alu_out;
-	imm8_reg <= inst_ipipe[3]; // 
+	imm8_reg <= inst_ipipe[3][15:8]; // 
 	imm8_ext_reg <= imm8_ext;
 end
 endmodule
