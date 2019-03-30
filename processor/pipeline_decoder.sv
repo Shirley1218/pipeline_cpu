@@ -117,7 +117,6 @@ module dependency_helper(
 	input [4:0] opcode [1:4], 
 	output hold_in_decode_state
 	);
-	logic n_valid, z_valid, rx_valid, mem_ry_valid;
 	logic [2:0] rx_wr;
 	logic [2:0] ry_wr;
 	logic [2:0] rx_rd; 
@@ -134,7 +133,7 @@ module dependency_helper(
 
 	logic [2:0] reading_src;//each bit represent need for each resource
 	logic [2:0] writing_dst;
-	logic reading_count; // 1 for rx and ry, 0 for all the others 
+	logic [1:0] reading_reg; // reading_reg[1] for rx ,reading_reg[0] for ry
 
 	always_comb begin
 		case (opcode[3])
@@ -158,20 +157,20 @@ module dependency_helper(
 	end
 
 	always_comb begin
-		reading_count = 1'b0;
+		reading_reg = 2'b00;
 		case (opcode[2])
-			5'b00000 :  reading_src = 3'b010;
-			5'b00001 :  begin reading_src = 3'b010; reading_count = 1'b1; end
-			5'b00010 :  begin reading_src = 3'b010; reading_count = 1'b1; end
+			5'b00000 :  begin reading_src = 3'b010; reading_reg = 2'b01; end
+			5'b00001 :  begin reading_src = 3'b010; reading_reg = 2'b11; end
+			5'b00010 :  begin reading_src = 3'b010; reading_reg = 1'b11; end
 
-			5'b00011 :  begin reading_src = 3'b010; reading_count = 1'b1; end//cmp
+			5'b00011 :  begin reading_src = 3'b010; reading_reg = 1'b11; end//cmp
 			5'b00100 :  reading_src = 3'b001;
-			5'b00101 :  reading_src = 3'b010;	//st
+			5'b00101 :  begin reading_src = 3'b010;	reading_reg = 2'b10; end//st
 
 			5'b10000 :  reading_src = 3'b000;		//mvi
-			5'b10001 :  reading_src = 3'b010;
-			5'b10010 :  reading_src = 3'b010;
-			5'b10011 :  reading_src = 3'b010;	//cmpi
+			5'b10001 :  begin reading_src = 3'b010;	reading_reg = 2'b10; end
+			5'b10010 :  begin reading_src = 3'b010;	reading_reg = 2'b10; end
+			5'b10011 :  begin reading_src = 3'b010;	reading_reg = 2'b10; end	//cmpi
 			5'b10110 :  reading_src = 3'b000;	//mvhi
 
 			default : reading_src = 3'b000;
@@ -179,18 +178,18 @@ module dependency_helper(
 
 	end
 
+	logic rx_valid, ry_valid;
+
 	always_comb begin
 		valid[0] = ~(writing_dst[0] & reading_src[0]);
 
+		rx_valid = reading_reg[1] ? (rx_wr != rx_rd) : 1'b1;
+		ry_valid = reading_reg[0] ? (rx_wr != ry_rd) : 1'b1;
 
 		if(writing_dst[1] & reading_src[1]) begin
 			if(inst_ipipe[4] == 16'd0)begin 
 				valid [1] = 1'b1;
-			end else if(reading_count) begin
-				valid [1] =  (rx_wr != rx_rd) && (rx_wr != ry_rd);
-			end else begin
-				valid [1] =  (rx_wr != rx_rd);
-			end
+			end else valid[1] = rx_valid & ry_valid;
 		end
 		else valid[1] = 1'b1;
 
@@ -211,6 +210,6 @@ module dependency_helper(
 		end
 	end
 
-	assign hold_in_decode_state = hold | stalled[0] | stalled[0];
+	assign hold_in_decode_state = hold | stalled[0];
 
 endmodule

@@ -58,8 +58,10 @@ logic hold_in_decode_state;
 
 
 assign o_pc_addr = pc_out;
-assign o_pc_rd = pc_enable;
+assign o_pc_rd = 1'b1;//always true?
 assign pc_in = pc_nxt;
+
+reg [15:0] pc_cache;
 // implement the cpu pipeline
 always_ff @(posedge clk or posedge reset) begin 
 	
@@ -73,13 +75,21 @@ always_ff @(posedge clk or posedge reset) begin
 
 	end else begin
 
+		pc_cache <= i_pc_rddata;
+
 		// Pipeline Stage 1: Fetch
+		if(hold_in_decode_state) inst_ipipe[1] <= pc_cache;
+		else inst_ipipe[1] <= inst_ipipe[1];
+
 		if(hold_in_decode_state)begin
 			inst_ipipe[2] <= inst_ipipe[2];
 			inst_ipipe[3] <= 16'hffff;
 			inst_ipipe[4] <= inst_ipipe[3];
 		end else begin
-			inst_ipipe[2] <= i_pc_rddata;
+			//this is a nasty hack
+			if((inst_ipipe[3] == 16'hffff ) && (inst_ipipe[4] == 16'hffff )) inst_ipipe[2] <= inst_ipipe[1];
+			else inst_ipipe[2] <= i_pc_rddata;
+			// inst_ipipe[2] <= i_pc_rddata;
 			inst_ipipe[3] <= inst_ipipe[2];
 			inst_ipipe[4] <= inst_ipipe[3];
 		end
