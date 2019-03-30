@@ -6,6 +6,7 @@ module pipeline_decoder(
 	input reset,
 	//input opcode
 	input [4:0] opcode [1:4], 
+	input hold_in_decode_state,
 	
 	// control signals for each stages 
 
@@ -37,7 +38,10 @@ module pipeline_decoder(
 	// stage 1 Fetch opcode[2]
 	always_comb begin
 		// branch instruction disable pc_enable for part 1
-		if ( opcode[2][3] == 1'b1 ) begin
+		if(hold_in_decode_state) begin
+			PCSrc = 1'b1;
+			pc_enable = 1'b0;
+		end else if ( opcode[2][3] == 1'b1 ) begin
 			pc_enable = 1'b0;
 			PCSrc = 1'b1;
 	 	end else begin
@@ -80,20 +84,27 @@ module pipeline_decoder(
 	// Stage 4 RegFile Write opcode[4]
 	always_comb begin
 
-		// RegWrite
-		if ( !opcode[4][3] & !(opcode[4][1] & opcode[4][0]) ) RegWrite = 1'b1;
-	    else RegWrite = 1'b0;
+		if(opcode[4] == 5'b11111) begin
+			RegWrite = 1'b0;
+			RegDst = 1'b0;//dont care
+			WBSrc = 3'b000;
 
-		// RegWrite
-		if ( opcode[4][3] ) RegDst = 1'b1;
-	    else RegDst = 1'b0;
+		end else begin
+			// RegWrite
+			if ( !opcode[4][3] & !(opcode[4][1] & opcode[4][0]) ) RegWrite = 1'b1;
+		    else RegWrite = 1'b0;
 
-		// WBSrc
-		if ( opcode[4] == 5'b00000 ) WBSrc = 3'b010;
-	    else if ( opcode[4] == 5'b00100 ) WBSrc = 3'b000;
-		else if ( opcode[4] == 5'b10000 ) WBSrc = 3'b011;
-		else if ( opcode[4] == 5'b10110 ) WBSrc = 3'b100;
-		else WBSrc = 3'b001;
+			// RegWrite
+			if ( opcode[4][3] ) RegDst = 1'b1;
+		    else RegDst = 1'b0;
+
+			// WBSrc
+			if ( opcode[4] == 5'b00000 ) WBSrc = 3'b010;
+		    else if ( opcode[4] == 5'b00100 ) WBSrc = 3'b000;
+			else if ( opcode[4] == 5'b10000 ) WBSrc = 3'b011;
+			else if ( opcode[4] == 5'b10110 ) WBSrc = 3'b100;
+			else WBSrc = 3'b001;
+		end
 
 	end 
 
@@ -114,10 +125,10 @@ module dependency_helper(
 
 	logic [2:0] valid;
 
-	assign rx_wr = inst_ipipe[4][7:5];
-	assign ry_wr = inst_ipipe[4][10:8];
-	assign rx_rd = inst_ipipe[3][7:5];
-	assign ry_rd = inst_ipipe[3][10:8];
+	assign rx_wr = inst_ipipe[3][7:5];
+	assign ry_wr = inst_ipipe[3][10:8];
+	assign rx_rd = inst_ipipe[2][7:5];
+	assign ry_rd = inst_ipipe[2][10:8];
 
 	typedef enum { n_z, rf, mem_ry} resource;
 
@@ -126,7 +137,7 @@ module dependency_helper(
 	logic reading_count; // 1 for rx and ry, 0 for all the others 
 
 	always_comb begin
-		case (opcode[4])
+		case (opcode[3])
 			5'b00000 :  writing_dst = 3'b010;
 			5'b00001 :  writing_dst = 3'b010;
 			5'b00010 :  writing_dst = 3'b010;
@@ -148,7 +159,7 @@ module dependency_helper(
 
 	always_comb begin
 		reading_count = 1'b0;
-		case (opcode[3])
+		case (opcode[2])
 			5'b00000 :  reading_src = 3'b010;
 			5'b00001 :  begin reading_src = 3'b010; reading_count = 1'b1; end
 			5'b00010 :  begin reading_src = 3'b010; reading_count = 1'b1; end
@@ -187,15 +198,19 @@ module dependency_helper(
 		else valid[2] = 1'b1;
 	end
 
-	reg stalled;
+	logic hold;
+	assign hold = (~(valid[0] & valid[1] &valid[2]));
+
+	reg [1:0] stalled;
 	always_ff @(posedge clk or posedge reset) begin 
 		if(reset) begin
-			stalled <= 0;
+			stalled <= 2'b00;
 		end else begin
-			stalled <= hold_in_decode_state;
+			stalled[0] <= hold;
+			stalled[1] <= stalled[0];
 		end
 	end
 
-	assign hold_in_decode_state = ~((valid[0] & valid[1] &valid[2])|stalled);
+	assign hold_in_decode_state = hold | stalled[0] | stalled[0];
 
 endmodule

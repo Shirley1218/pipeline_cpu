@@ -76,8 +76,8 @@ always_ff @(posedge clk or posedge reset) begin
 		// Pipeline Stage 1: Fetch
 		if(hold_in_decode_state)begin
 			inst_ipipe[2] <= inst_ipipe[2];
-			inst_ipipe[3] <= inst_ipipe[3];
-			inst_ipipe[4] <= inst_ipipe[4];
+			inst_ipipe[3] <= 16'hffff;
+			inst_ipipe[4] <= inst_ipipe[3];
 		end else begin
 			inst_ipipe[2] <= i_pc_rddata;
 			inst_ipipe[3] <= inst_ipipe[2];
@@ -153,7 +153,8 @@ pipeline_decoder control_path0(
 	// Stage 4 RegFile Write
 	.RegWrite(RegWrite),// write enable to regitor files
 	.WBSrc(WBSrc),//000 for memory, 001 for alu output, 010 for pc+2, 011 for [Ry], 100 for imm8
-	.RegDst(RegDst)// 0 for Rx, 1 for R7
+	.RegDst(RegDst),// 0 for Rx, 1 for R7
+	.hold_in_decode_state(hold_in_decode_state)
 );
 
 
